@@ -1,63 +1,85 @@
 import tkinter as tk
 from tkinter import messagebox
+from meeting_bot import join_meeting, exit_meeting
+import threading
+import signal
+import sys
 
-# --- Animation Function ---
-def animate_text(label, text, delay=50, index=0):
-    if index <= len(text):
-        label.config(text=text[:index])
-        label.after(delay, animate_text, label, text, delay, index + 1)
+# Audio file path for recording
+audio_file = r"D:/MEETINGBOTPYTHON/meeting_audio.wav"
+
+threads = []
 
 # --- Meeting Functions ---
-def join_meeting():
+def start_bot():
+    """Start the bot to join the meeting."""
     meeting_link = link_entry.get()
     if not meeting_link:
         messagebox.showwarning("Input Error", "Please paste a meeting link.")
         return
 
     if "teams.microsoft.com" in meeting_link or "meet.google.com" in meeting_link:
-        messagebox.showinfo("Meeting Bot", f"The bot is attempting to join the meeting")
+        messagebox.showinfo("Meeting Bot", "Joining the meeting...")
+        thread = threading.Thread(target=join_meeting, args=(meeting_link, audio_file))
+        thread.start()
+        threads.append(thread)
     else:
         messagebox.showerror("Invalid Link", "Please enter a valid Teams or Google Meet link.")
 
-def exit_meeting():
-    messagebox.showinfo("Meeting Bot", "The bot has exited the meeting.")
+def stop_bot():
+    """Exit the bot from the meeting."""
+    messagebox.showinfo("Meeting Bot", "Exiting the meeting...")
+    threading.Thread(target=exit_meeting).start()
+
+def refresh_input():
+    """Clear the input field."""
+    link_entry.delete(0, tk.END)
 
 # --- Page Functions ---
 def show_home():
+    """Display the Home Page."""
     clear_frame()
-    tk.Label(content_frame, text="Welcome to Meeting Bot", font=("Helvetica", 24, "bold"), bg="#e6f7ff", fg="#004080").place(relx=0.5, rely=0.2, anchor="center")
-    tk.Label(content_frame, text="Paste Meeting Link (Teams or Google Meet):", font=("Arial", 14), bg="#e6f7ff", fg="#333").place(relx=0.5, rely=0.4, anchor="center")
+    tk.Label(content_frame, text="Welcome to Meeting Bot", font=("Helvetica", 24, "bold"), bg="#e6f7ff").place(relx=0.5, rely=0.2, anchor="center")
+    tk.Label(content_frame, text="Paste Meeting Link (Teams or Google Meet):", font=("Arial", 14), bg="#e6f7ff").place(relx=0.5, rely=0.4, anchor="center")
 
     global link_entry
     link_entry = tk.Entry(content_frame, width=50, font=("Arial", 12))
     link_entry.place(relx=0.5, rely=0.45, anchor="center")
 
-    # Use a Frame to contain buttons
+    # Buttons for Join, Exit, and Refresh
     button_frame = tk.Frame(content_frame, bg="#e6f7ff")
     button_frame.place(relx=0.5, rely=0.55, anchor="center")
 
-    # Buttons with spacing (pady)
-    tk.Button(button_frame, text="Join Meeting", font=("Arial", 12, "bold"), bg="#28a745", fg="white", 
-              command=join_meeting, relief="flat", bd=0, padx=10, pady=5).pack(side=tk.LEFT, padx=15)
+    tk.Button(button_frame, text="Join Meeting", font=("Arial", 12), bg="#28a745", fg="white", 
+              command=start_bot).pack(side=tk.LEFT, padx=10)
 
-    tk.Button(button_frame, text="Exit Meeting", font=("Arial", 12, "bold"), bg="#dc3545", fg="white", 
-              command=exit_meeting, relief="flat", bd=0, padx=10, pady=5).pack(side=tk.LEFT, padx=15)
+    tk.Button(button_frame, text="Exit Meeting", font=("Arial", 12), bg="#dc3545", fg="white", 
+              command=stop_bot).pack(side=tk.LEFT, padx=10)
 
-def show_summary_report():
-    clear_frame()
-    tk.Label(content_frame, text="Summary Report", font=("Helvetica", 24, "bold"), bg="#e6f7ff", fg="#004080").place(relx=0.5, rely=0.2, anchor="center")
-    tk.Label(content_frame, text="Summary report content goes here...", font=("Arial", 14), bg="#e6f7ff", fg="#333").place(relx=0.5, rely=0.5, anchor="center")
+    tk.Button(button_frame, text="Refresh", font=("Arial", 12), bg="#ffc107", fg="black", 
+              command=refresh_input).pack(side=tk.LEFT, padx=10)
 
 def show_contact_us():
+    """Display the Contact Us Page."""
     clear_frame()
-    tk.Label(content_frame, text="Contact Us", font=("Helvetica", 24, "bold"), bg="#e6f7ff", fg="#004080").place(relx=0.5, rely=0.2, anchor="center")
-    contact_info = "Email: support@meetingbot.com\nPhone: +1234567890"
-    tk.Label(content_frame, text=contact_info, font=("Arial", 14), bg="#e6f7ff", fg="#333", justify="center").place(relx=0.5, rely=0.5, anchor="center")
+    tk.Label(content_frame, text="Contact Us", font=("Helvetica", 24, "bold"), bg="#e6f7ff").place(relx=0.5, rely=0.2, anchor="center")
+    tk.Label(content_frame, text="For support, contact us at:", font=("Arial", 14), bg="#e6f7ff").place(relx=0.5, rely=0.4, anchor="center")
+    tk.Label(content_frame, text="Email: support@meetingbot.com", font=("Arial", 12), bg="#e6f7ff").place(relx=0.5, rely=0.5, anchor="center")
+    tk.Label(content_frame, text="Phone: +1-800-123-4567", font=("Arial", 12), bg="#e6f7ff").place(relx=0.5, rely=0.55, anchor="center")
 
-# --- Utility Functions ---
 def clear_frame():
+    """Clear all widgets in the content frame."""
     for widget in content_frame.winfo_children():
         widget.destroy()
+
+def handle_exit_signal(signum, frame):
+    """Handle Ctrl+C and cleanly exit the program."""
+    print("\nCtrl+C detected. Exiting application...")
+    for thread in threads:
+        if thread.is_alive():
+            print("Waiting for threads to complete...")
+            thread.join()
+    sys.exit(0)
 
 # --- Main Application ---
 app = tk.Tk()
@@ -69,16 +91,21 @@ app.configure(bg="#eaeaea")
 nav_frame = tk.Frame(app, bg="#004080")
 nav_frame.pack(fill=tk.X)
 
-tk.Button(nav_frame, text="Home", font=("Arial", 12, "bold"), bg="#004080", fg="white", command=show_home, relief="flat", padx=10).pack(side=tk.LEFT, pady=10)
-tk.Button(nav_frame, text="Summary Report", font=("Arial", 12, "bold"), bg="#004080", fg="white", command=show_summary_report, relief="flat", padx=10).pack(side=tk.LEFT, pady=10)
-tk.Button(nav_frame, text="Contact Us", font=("Arial", 12, "bold"), bg="#004080", fg="white", command=show_contact_us, relief="flat", padx=10).pack(side=tk.LEFT, pady=10)
+tk.Button(nav_frame, text="Home", font=("Arial", 12), bg="#004080", fg="white", command=show_home).pack(side=tk.LEFT, padx=10, pady=10)
+tk.Button(nav_frame, text="Contact Us", font=("Arial", 12), bg="#004080", fg="white", command=show_contact_us).pack(side=tk.LEFT, padx=10, pady=10)
 
 # Content Frame
-content_frame = tk.Frame(app, bg="#e6f7ff")  # Set light blue background
+content_frame = tk.Frame(app, bg="#e6f7ff")
 content_frame.pack(fill=tk.BOTH, expand=True)
 
 # Initialize Home Page
 show_home()
 
+# Handle Ctrl+C
+signal.signal(signal.SIGINT, handle_exit_signal)
+
 # Run the Application
-app.mainloop()
+try:
+    app.mainloop()
+except KeyboardInterrupt:
+    handle_exit_signal(None, None)
