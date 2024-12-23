@@ -12,7 +12,24 @@ def analyze_transcript(file_path):
     # Define the prompt
     prompt = (
         "Extract the high-level features discussed in the meeting transcript and format them into a JSON object. "
-        "Each feature should include a brief description and, if applicable, associated sub-features or requirements."
+        "Each feature should include a brief description and, if applicable, associated sub-features or requirements. "
+        "Use the following JSON structure:\n\n"
+        "{\n"
+        "  \"features\": [\n"
+        "    {\n"
+        "      \"name\": \"Feature Name\",\n"
+        "      \"description\": \"Brief description of the feature\",\n"
+        "      \"sub_features\": [\n"
+        "        {\n"
+        "          \"name\": \"Sub-Feature Name\",\n"
+        "          \"description\": \"Brief description of the sub-feature\"\n"
+        "        }\n"
+        "      ]\n"
+        "    }\n"
+        "  ]\n"
+        "}\n\n"
+        "Ensure that all features and sub-features from the transcript are included accurately. "
+        "Only include relevant information about the product's functionality, leaving out unrelated discussions."
     )
 
     # Call the OpenAI API
