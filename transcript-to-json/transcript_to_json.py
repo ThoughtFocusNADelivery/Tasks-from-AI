@@ -1,15 +1,44 @@
 import openai
 import json
+from dotenv import load_dotenv
+import os
+import logging
 
-# Set your OpenAI API key
-openai.api_key = 'your-api-key-here'
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+# Load environment variables from .env file
+load_dotenv()
+
+# Retrieve the API key from environment variables
+openai_api_key = os.getenv('OPENAI_API_KEY')
+if not openai_api_key:
+    logging.error("OpenAI API key not found. Please set it in the .env file.")
+    exit(1)
+
+openai.api_key = openai_api_key
 
 def analyze_transcript(file_path):
-    # Read the transcript from the file
-    with open(file_path, 'r') as file:
-        transcript = file.read()
+    """
+    Analyzes a meeting transcript to extract high-level features and formats them into a JSON object.
 
-    # Define the prompt
+    Args:
+        file_path (str): The path to the transcript text file.
+    """
+    logging.info(f"Reading transcript from {file_path}")
+
+    # Read the transcript from the file
+    try:
+        with open(file_path, 'r') as file:
+            transcript = file.read()
+    except FileNotFoundError:
+        logging.error(f"Transcript file {file_path} not found.")
+        return
+    except Exception as e:
+        logging.error(f"Error reading transcript file: {e}")
+        return
+
+    # Define the prompt for the OpenAI API
     prompt = (
         "Extract the high-level features discussed in the meeting transcript and format them into a JSON object. "
         "Each feature should include a brief description and, if applicable, associated sub-features or requirements. "
@@ -32,30 +61,40 @@ def analyze_transcript(file_path):
         "Only include relevant information about the product's functionality, leaving out unrelated discussions."
     )
 
+    logging.info("Sending request to OpenAI API")
+
     # Call the OpenAI API
-    response = openai.Completion.create(
-        engine="gpt-4o",  # Use the appropriate engine
-        prompt=prompt + "\n\n" + transcript,
-        max_tokens=1500,  # Adjust as needed
-        temperature=0.5  # Adjust as needed
-    )
+    try:
+        response = openai.Completion.create(
+            engine="gpt-4o",  # Use the appropriate engine
+            prompt=prompt + "\n\n" + transcript,
+            max_tokens=1500,  # Adjust as needed
+            temperature=0.5  # Adjust as needed
+        )
+    except Exception as e:
+        logging.error(f"Error calling OpenAI API: {e}")
+        return
 
     # Parse the response
     features = response.choices[0].text.strip()
+    logging.info("Received response from OpenAI API")
 
     # Convert the response to a JSON object
     try:
         features_json = json.loads(features)
     except json.JSONDecodeError:
-        print("Failed to decode JSON. Please check the response format.")
+        logging.error("Failed to decode JSON. Please check the response format.")
         return
 
     # Write the JSON object to a file
     output_file_path = 'features.json'
-    with open(output_file_path, 'w') as json_file:
-        json.dump(features_json, json_file, indent=4)
-
-    print(f"Features extracted and saved to {output_file_path}")
+    try:
+        with open(output_file_path, 'w') as json_file:
+            json.dump(features_json, json_file, indent=4)
+        logging.info(f"Features extracted and saved to {output_file_path}")
+    except Exception as e:
+        logging.error(f"Error writing to output file: {e}")
 
 # Example usage
-analyze_transcript('transcript.txt')
+if __name__ == "__main__":
+    analyze_transcript('transcript.txt')
