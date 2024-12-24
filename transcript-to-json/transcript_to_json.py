@@ -40,7 +40,7 @@ def analyze_transcript(file_path):
         logging.error(f"Error reading transcript file: {e}")
         return
 
-    # Define the prompt for the OpenAI API
+    # Define the prompt for the OpenAI API, including the transcript
     prompt = (
         "Extract the high-level features discussed in the meeting transcript and format them into a JSON object. "
         "Each feature should include a brief description and, if applicable, associated sub-features or requirements. "
@@ -60,7 +60,9 @@ def analyze_transcript(file_path):
         "  ]\n"
         "}\n\n"
         "Ensure that all features and sub-features from the transcript are included accurately. "
-        "Only include relevant information about the product's functionality, leaving out unrelated discussions."
+        "Only include relevant information about the product's functionality, leaving out unrelated discussions.\n\n"
+        "Transcript:\n"
+        f"{transcript}"
     )
 
     logging.info("Sending request to OpenAI API")
