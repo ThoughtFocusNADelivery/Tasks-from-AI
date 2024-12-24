@@ -44,7 +44,7 @@ def analyze_transcript(file_path):
     prompt = (
         "Extract the high-level features discussed in the meeting transcript and format them into a JSON object. "
         "Each feature should include a brief description and, if applicable, associated sub-features or requirements. "
-        "Use the following JSON structure:\n\n"
+        "Use the following JSON structure (JSON object only as plain text, do not add any code blocks):\n\n"
         "{\n"
         "  \"features\": [\n"
         "    {\n"
@@ -78,7 +78,7 @@ def analyze_transcript(file_path):
         )
         # Extract the JSON serializable part of the response
         response_data = response.to_dict()  # Convert the response to a dictionary
-        # Log the raw response JSON with proper formatting
+        # Log the response JSON with proper formatting
         logging.debug("OpenAI API response: %s", json.dumps(response_data, indent=4))
     except Exception as e:
         logging.error(f"Error calling OpenAI API: {e}")
