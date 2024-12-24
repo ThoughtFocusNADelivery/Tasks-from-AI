@@ -3,7 +3,7 @@ import json
 from dotenv import load_dotenv
 import os
 import logging
-
+from openai import OpenAI
 # Configure logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -67,18 +67,19 @@ def analyze_transcript(file_path):
 
     # Call the OpenAI API
     try:
-        response = openai.Completion.create(
-            engine="gpt-4o",  # Use the appropriate engine
-            prompt=prompt + "\n\n" + transcript,
-            max_tokens=1500,  # Adjust as needed
-            temperature=0.5  # Adjust as needed
+        client = OpenAI(api_key = openai.api_key)
+        response = client.chat.completions.create(
+            model="gpt-4o",
+            messages=[
+                {"role": "user","content": prompt},
+            ],
         )
     except Exception as e:
         logging.error(f"Error calling OpenAI API: {e}")
         return
 
     # Parse the response
-    features = response.choices[0].text.strip()
+    features = response.choices[0].message.content.strip()
     logging.info("Received response from OpenAI API")
 
     # Convert the response to a JSON object
