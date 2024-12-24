@@ -42,8 +42,9 @@ def analyze_transcript(file_path):
 
     # Define the prompt for the OpenAI API, including the transcript
     prompt = (
-        "Extract the tasks and epics discussed in the meeting transcript and format them into a JSON object. "
-        "Each task and epic should include a title, description, status, priority, and other relevant details. "
+        "Extract the tasks and epics discussed in the meeting transcript and format them into a JSON object, oriented for Agile Scrum. "
+        "Epics should represent high-level goals or initiatives, while tasks should be actionable steps derived from these epics. "
+        "Sub-tasks should represent specific development activities or deliverables that contribute to completing the tasks. "
         "Use the following JSON structure (JSON object only as plain text, do not add any code blocks):\n\n"
         "{\n"
         "    \"tasks\": [\n"
@@ -78,8 +79,14 @@ def analyze_transcript(file_path):
         "        }\n"
         "    ]\n"
         "}\n\n"
-        "Ensure that all tasks and epics from the transcript are included accurately. "
-        "Only include relevant information about the project's tasks and epics, leaving out unrelated discussions.\n\n"
+        "Key Guidelines for Extraction:\n\n"
+        "1. Identify high-level features or overarching objectives as epics. These should capture broad functionality or business goals.\n"
+        "2. Break down epics into smaller, actionable child tasks that can be directly implemented.\n"
+        "3. Identify individual steps or implementation details as tasks if they do not belong to an epic.\n"
+        "4. Derive subtasks from each task to represent specific development activities or steps.\n"
+        "5. For each epic, task, and subtask, include appropriate attributes such as status, priority, and points (for tasks and subtasks).\n"
+        "6. Ensure that the JSON captures all relevant information accurately while maintaining the hierarchy between epics, tasks, and subtasks. "
+        "Exclude unrelated discussions from the transcript.\n\n"
         "Transcript:\n"
         f"{transcript}"
     )
@@ -115,7 +122,7 @@ def analyze_transcript(file_path):
         return
 
     # Write the JSON object to a file
-    output_file_path = 'features.json'
+    output_file_path = 'tasks-import. json'
     logging.debug(f"Output file path: {output_file_path}")
     try:
         with open(output_file_path, 'w') as json_file:
