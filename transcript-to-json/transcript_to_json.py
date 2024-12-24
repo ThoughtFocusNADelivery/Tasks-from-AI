@@ -67,13 +67,17 @@ def analyze_transcript(file_path):
 
     # Call the OpenAI API
     try:
-        client = OpenAI(api_key = openai.api_key)
+        client = OpenAI(api_key=openai.api_key)
         response = client.chat.completions.create(
             model="gpt-4o",
             messages=[
-                {"role": "user","content": prompt},
+                {"role": "user", "content": prompt},
             ],
         )
+        # Extract the JSON serializable part of the response
+        response_data = response.to_dict()  # Convert the response to a dictionary
+        # Log the raw response JSON with proper formatting
+        logging.debug("OpenAI API response: %s", json.dumps(response_data, indent=4))
     except Exception as e:
         logging.error(f"Error calling OpenAI API: {e}")
         return
