@@ -5,13 +5,14 @@ import os
 import logging
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Load environment variables from .env file
 load_dotenv()
 
 # Retrieve the API key from environment variables
 openai_api_key = os.getenv('OPENAI_API_KEY')
+logging.debug(f"OpenAI API Key: {openai_api_key}")
 if not openai_api_key:
     logging.error("OpenAI API key not found. Please set it in the .env file.")
     exit(1)
@@ -25,6 +26,7 @@ def analyze_transcript(file_path):
     Args:
         file_path (str): The path to the transcript text file.
     """
+    logging.info(f"Starting analysis for {file_path}")
     logging.info(f"Reading transcript from {file_path}")
 
     # Read the transcript from the file
@@ -88,12 +90,15 @@ def analyze_transcript(file_path):
 
     # Write the JSON object to a file
     output_file_path = 'features.json'
+    logging.debug(f"Output file path: {output_file_path}")
     try:
         with open(output_file_path, 'w') as json_file:
             json.dump(features_json, json_file, indent=4)
         logging.info(f"Features extracted and saved to {output_file_path}")
     except Exception as e:
         logging.error(f"Error writing to output file: {e}")
+
+    logging.info("Finished analysis")
 
 # Example usage
 if __name__ == "__main__":
