@@ -6,7 +6,6 @@ This project makes use of Pyannote.audio and WHisper by OpenAI to analysis call 
 - [Installation](#installation)
 - [Configuration](#configuration)
 - [Running the Project](#running-the-project)
-- [Metric calculation](#metric-calculation)
 
 ---
 
@@ -54,15 +53,24 @@ Before running the project, make sure you have the following installed:
    OPENAI_API_KEY = [YOUR-API-KEY]
    ```
 
+2. **Setup config.json with output path for transcript and log files(Optional)**
+   ```
+   {
+    "folders": {
+    "data_folder": "./data/audio",
+    "transcript_folder": "./transcript",
+    "log_folder": "./data/log"
+      }
+   }
+   ```
+
 ## Running the Project
 
 1. **Navigate to /Tasks-from-AI folder in the terminal**
 
 2. **Place the audio file in ./data/audio folder**
-
-3. **Configure output path in config.json**
  
-4. **Run the python file**
+3. **Run the python file**
    ```bash
    python main.py
    ```
