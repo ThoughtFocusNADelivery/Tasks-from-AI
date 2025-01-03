@@ -53,7 +53,7 @@ Before running the project, make sure you have the following installed:
    OPENAI_API_KEY = [YOUR-API-KEY]
    ```
 
-2. **Setup config.json with output path for transcript and log files(Optional)**
+2. **Setup config.json with output path for transcript and log files (Optional)**
    ```
    {
     "folders": {
