@@ -1,0 +1,8 @@
+{
+  "folders": {
+    "data_folder": "./data/audio",
+    "processed_folder": "./data/processed",
+    "transcript_folder": "./transcript",
+    "log_folder": "./data/log"
+  }
+}
